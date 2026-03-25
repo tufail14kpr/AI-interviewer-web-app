@@ -325,10 +325,10 @@ const QUESTION_VARIANTS = {
 
 const normalizeScore = (value) => Math.max(0, Math.min(100, Math.round(value)))
 
-const buildQuestionText = ({ role, seniority, topic, style, variantText, emphasis }) => {
+const buildQuestionText = ({ role, seniority, style, variantText }) => {
   const promptStart = fallbackQuestionStarters[style][seniority]
   const roleLabel = ROLE_BLUEPRINTS[role].label.toLowerCase()
-  return `${promptStart} ${variantText} in a ${roleLabel} role? ${emphasis}`
+  return `${promptStart} ${variantText} in a ${roleLabel} role?`
 }
 
 const summarizeCorrectness = (entries) =>
@@ -380,11 +380,11 @@ const evaluateMockAnswer = (turn, index) => {
   }
 }
 
-const pickVariantText = ({ topic, style, usedQuestions, role, seniority, emphasis }) => {
+const pickVariantText = ({ topic, style, usedQuestions, role, seniority }) => {
   const variants = QUESTION_VARIANTS[topic]?.[style] || [topicLabels[topic] || 'a technical problem in your stack']
 
   for (const variantText of variants) {
-    const candidate = buildQuestionText({ role, seniority, topic, style, variantText, emphasis })
+    const candidate = buildQuestionText({ role, seniority, style, variantText })
     if (!usedQuestions.has(candidate)) {
       return { variantText, question: candidate }
     }
@@ -393,7 +393,7 @@ const pickVariantText = ({ topic, style, usedQuestions, role, seniority, emphasi
   const rotatedText = `${variants[0]} from a fresh angle`
   return {
     variantText: rotatedText,
-    question: buildQuestionText({ role, seniority, topic, style, variantText: rotatedText, emphasis })
+    question: buildQuestionText({ role, seniority, style, variantText: rotatedText })
   }
 }
 
@@ -403,18 +403,13 @@ export const generateMockQuestion = ({ role, seniority, turns, previousQuestions
   const topicPool = remainingTopics.length > 0 ? remainingTopics : ROLE_BLUEPRINTS[role].topics
   const topicIndex = previousQuestions.length % topicPool.length
   const topic = topicPool[topicIndex] || topicPool[0]
-  const emphasis =
-    remainingTopics.length > 0
-      ? `Focus on ${remainingTopics.slice(0, 2).map((item) => topicLabels[item] || item).join(' and ')} next.`
-      : 'Build on what the candidate has already discussed.'
   const usedQuestions = new Set([...previousQuestions, ...turns.map((turn) => turn.question)])
   const { question } = pickVariantText({
     topic,
     style,
     usedQuestions,
     role,
-    seniority,
-    emphasis
+    seniority
   })
 
   return {

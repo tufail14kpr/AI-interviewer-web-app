@@ -10,6 +10,43 @@ export const serializeUser = (user) => ({
   email: user.email
 })
 
+const normalizeReportTranscript = (session) => {
+  const baseTranscript = session.report?.transcript || buildTranscript(session.turns)
+
+  return baseTranscript.map((entry, index) => ({
+    questionNumber: entry.questionNumber ?? index + 1,
+    topic: entry.topic || 'general',
+    question: entry.question || '',
+    answer: entry.answer || '',
+    verdict: entry.verdict || 'partial',
+    accuracyScore:
+      entry.accuracyScore ?? (entry.verdict === 'correct' ? 85 : entry.verdict === 'incorrect' ? 35 : 60),
+    feedback:
+      entry.feedback ||
+      'Detailed per-question grading is available on newly completed interviews. This older report was normalized for display.'
+  }))
+}
+
+const summarizeCorrectness = (transcript) =>
+  transcript.reduce(
+    (summary, entry) => {
+      if (entry.verdict === 'correct') {
+        summary.correctAnswers += 1
+      } else if (entry.verdict === 'incorrect') {
+        summary.incorrectAnswers += 1
+      } else {
+        summary.partialAnswers += 1
+      }
+
+      return summary
+    },
+    {
+      correctAnswers: 0,
+      partialAnswers: 0,
+      incorrectAnswers: 0
+    }
+  )
+
 export const serializeSessionSummary = (session) => ({
   id: session._id?.toString() || session.id,
   role: session.role,
@@ -60,21 +97,21 @@ export const serializeSession = (session) => {
   }
 }
 
-export const serializeReport = (session) => ({
-  sessionId: session._id?.toString() || session.id,
-  role: session.role,
-  seniority: session.seniority,
-  overallScore: session.report?.overallScore ?? 0,
-  categoryScores: session.report?.categoryScores || {},
-  correctnessSummary: session.report?.correctnessSummary || {
-    correctAnswers: 0,
-    partialAnswers: 0,
-    incorrectAnswers: 0
-  },
-  strengths: session.report?.strengths || [],
-  weaknesses: session.report?.weaknesses || [],
-  tips: session.report?.tips || [],
-  summary: session.report?.summary || '',
-  transcript: session.report?.transcript || buildTranscript(session.turns),
-  completedAt: session.completedAt || null
-})
+export const serializeReport = (session) => {
+  const transcript = normalizeReportTranscript(session)
+
+  return {
+    sessionId: session._id?.toString() || session.id,
+    role: session.role,
+    seniority: session.seniority,
+    overallScore: session.report?.overallScore ?? 0,
+    categoryScores: session.report?.categoryScores || {},
+    correctnessSummary: session.report?.correctnessSummary || summarizeCorrectness(transcript),
+    strengths: session.report?.strengths || [],
+    weaknesses: session.report?.weaknesses || [],
+    tips: session.report?.tips || [],
+    summary: session.report?.summary || '',
+    transcript,
+    completedAt: session.completedAt || null
+  }
+}

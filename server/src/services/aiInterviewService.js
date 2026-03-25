@@ -272,7 +272,7 @@ export const generateNextQuestion = async ({
               {
                 type: 'input_text',
                 text:
-                  'You are an exacting technical interviewer. Produce exactly one next interview question as JSON. Never ask more than one question. Never include an answer, explanation, rubric, or markdown.'
+                  'You are an exacting technical interviewer. Produce exactly one next interview question as JSON. Ask about only one primary topic for this turn. Never ask more than one question. Do not mention future topics, follow-up plans, or what comes next. Never include an answer, explanation, rubric, or markdown.'
               }
             ]
           },
@@ -287,12 +287,14 @@ export const generateNextQuestion = async ({
                   `Question number: ${questionNumber} of ${targetQuestionCount}`,
                   `Required style for this turn: ${expectedStyle}`,
                   `Allowed topics: ${roleBlueprint.topics.join(', ')}`,
-                  `Remaining uncovered topics: ${remainingTopics.join(', ') || 'none'}`,
+                  `Preferred primary topic for this turn: ${remainingTopics[0] || 'choose one allowed topic'}`,
+                  `Other uncovered topics to save for later turns: ${remainingTopics.slice(1).join(', ') || 'none'}`,
                   `Previously asked questions to avoid repeating: ${previousQuestions.join(' || ') || 'none'}`,
                   `Role guidance: ${roleBlueprint.guidance}`,
                   `Seniority guidance: ${seniorityProfile.guidance}`,
                   'The interview style should balance theory, scenario, and practical discussion.',
                   'Do not repeat or lightly paraphrase any previously asked question from earlier sessions.',
+                  'The returned question must stay tightly focused on the single primary topic selected for this turn.',
                   'Use the prior transcript to avoid repetition and build naturally on prior answers.',
                   `Transcript so far:\n${buildQuestionHistory(turns) || 'No prior turns.'}`
                 ].join('\n')

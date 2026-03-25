@@ -75,6 +75,8 @@ run('mock generator avoids exact previous-session question repeats', () => {
   })
 
   assert.notEqual(firstQuestion.question, secondQuestion.question)
+  assert.equal(firstQuestion.question.includes('Focus on'), false)
+  assert.equal(secondQuestion.question.includes('Focus on'), false)
 })
 
 run('mock evaluation returns correct, partial, and incorrect counts', () => {
