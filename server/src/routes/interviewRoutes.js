@@ -7,7 +7,7 @@ import {
   getQuestionStyle,
   pickTargetQuestionCount
 } from '../lib/interviewBlueprint.js'
-import { serializeSession, serializeSessionSummary } from '../lib/serializers.js'
+import { serializeReport, serializeSession, serializeSessionSummary } from '../lib/serializers.js'
 import { assertAnswer, assertRole, assertSeniority } from '../lib/validators.js'
 import { evaluateInterview, generateNextQuestion } from '../services/aiInterviewService.js'
 
@@ -26,6 +26,35 @@ const ensureActiveSession = (session) => {
   if (session.status !== 'active') {
     throw new ApiError(409, 'This interview session is already completed.', 'session_completed')
   }
+}
+
+const hydratePendingQuestion = async (session) => {
+  const hasPendingTurn = session.turns.some((turn) => !turn.answer?.trim())
+  if (
+    hasPendingTurn ||
+    !session.generationState.pendingNextQuestion ||
+    session.turns.length >= session.targetQuestionCount
+  ) {
+    return session
+  }
+
+  const nextQuestion = await generateNextQuestion({
+    role: session.role,
+    seniority: session.seniority,
+    turns: session.turns,
+    targetQuestionCount: session.targetQuestionCount
+  })
+
+  session.turns.push({
+    topic: nextQuestion.topic,
+    style: nextQuestion.style || getQuestionStyle(session.turns.length),
+    question: nextQuestion.question
+  })
+  session.generationState.pendingNextQuestion = false
+  session.generationState.retryableMessage = ''
+  await session.save()
+
+  return session
 }
 
 router.get(
@@ -76,6 +105,12 @@ router.get(
   '/:id',
   asyncHandler(async (request, response) => {
     const session = await findUserSession(request.params.id, request.user._id)
+    try {
+      await hydratePendingQuestion(session)
+    } catch (_error) {
+      await session.save()
+    }
+
     response.json({
       session: serializeSession(session)
     })
@@ -90,6 +125,18 @@ router.post(
 
     const currentTurn = session.turns.find((turn) => !turn.answer?.trim())
     if (!currentTurn) {
+      if (session.generationState.pendingNextQuestion) {
+        await hydratePendingQuestion(session)
+        response.json({
+          status: 'active',
+          question: session.turns.at(-1)?.question || null,
+          questionNumber: session.turns.length,
+          remainingEstimated: estimateRemainingQuestions(session),
+          session: serializeSession(session)
+        })
+        return
+      }
+
       throw new ApiError(
         409,
         'There is no pending question to answer. Complete the interview or refresh the session.',
@@ -154,10 +201,18 @@ router.post(
 
     if (session.status === 'completed') {
       response.json({
-        report: session.report,
+        report: serializeReport(session),
         session: serializeSession(session)
       })
       return
+    }
+
+    if (session.turns.length < session.targetQuestionCount) {
+      throw new ApiError(
+        409,
+        'The interview has not reached the target question count yet.',
+        'interview_incomplete'
+      )
     }
 
     const pendingTurn = session.turns.find((turn) => !turn.answer?.trim())
@@ -180,10 +235,9 @@ router.post(
 
     response.json({
       session: serializeSession(session),
-      report
+      report: serializeReport(session)
     })
   })
 )
 
 export default router
-

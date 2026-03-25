@@ -14,22 +14,22 @@ export const InterviewPage = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  useEffect(() => {
-    const loadSession = async () => {
-      try {
-        const payload = await interviewApi.get(token, sessionId)
-        setSession(payload.session)
+  const loadSession = async () => {
+    try {
+      const payload = await interviewApi.get(token, sessionId)
+      setSession(payload.session)
 
-        if (payload.session.status === 'completed') {
-          navigate(`/report/${sessionId}`, { replace: true })
-        }
-      } catch (loadError) {
-        setError(loadError.message)
-      } finally {
-        setIsLoading(false)
+      if (payload.session.status === 'completed') {
+        navigate(`/report/${sessionId}`, { replace: true })
       }
+    } catch (loadError) {
+      setError(loadError.message)
+    } finally {
+      setIsLoading(false)
     }
+  }
 
+  useEffect(() => {
     loadSession()
   }, [navigate, sessionId, token])
 
@@ -142,6 +142,10 @@ export const InterviewPage = () => {
               {isSubmitting ? 'Saving answer...' : 'Submit Answer'}
             </button>
           </form>
+        ) : session.generationState?.pendingNextQuestion ? (
+          <button className="ghost-button" onClick={loadSession} type="button">
+            Retry Next Question
+          </button>
         ) : (
           <button className="primary-button" onClick={completeInterview} type="button">
             Complete Interview
@@ -151,4 +155,3 @@ export const InterviewPage = () => {
     </div>
   )
 }
-

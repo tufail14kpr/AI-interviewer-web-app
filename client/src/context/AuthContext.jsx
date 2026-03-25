@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import { authApi } from '../lib/api'
 
 const STORAGE_KEY = 'axis-interview-auth'
@@ -39,17 +39,14 @@ export const AuthProvider = ({ children }) => {
     return result
   }
 
-  const value = useMemo(
-    () => ({
-      token: session.token,
-      user: session.user,
-      isAuthenticated: Boolean(session.token),
-      login,
-      signup,
-      logout: clearSession
-    }),
-    [session]
-  )
+  const value = {
+    token: session.token,
+    user: session.user,
+    isAuthenticated: Boolean(session.token),
+    login,
+    signup,
+    logout: clearSession
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
@@ -63,4 +60,3 @@ export const useAuth = () => {
 
   return context
 }
-
