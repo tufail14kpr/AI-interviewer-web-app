@@ -417,6 +417,13 @@ button {
   gap: 14px;
 }
 
+.transcript-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -434,6 +441,39 @@ button {
 .status-pill.active {
   color: var(--gold);
   background: rgba(177, 125, 42, 0.12);
+}
+
+.verdict-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  text-transform: capitalize;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.verdict-pill.correct {
+  color: var(--olive);
+  background: rgba(95, 107, 83, 0.14);
+}
+
+.verdict-pill.partial {
+  color: var(--gold);
+  background: rgba(177, 125, 42, 0.14);
+}
+
+.verdict-pill.incorrect {
+  color: #8f2f23;
+  background: rgba(198, 96, 77, 0.14);
+}
+
+.answer-feedback {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(31, 36, 48, 0.05);
+  color: var(--muted);
 }
 
 .empty-panel {

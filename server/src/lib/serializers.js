@@ -66,6 +66,11 @@ export const serializeReport = (session) => ({
   seniority: session.seniority,
   overallScore: session.report?.overallScore ?? 0,
   categoryScores: session.report?.categoryScores || {},
+  correctnessSummary: session.report?.correctnessSummary || {
+    correctAnswers: 0,
+    partialAnswers: 0,
+    incorrectAnswers: 0
+  },
   strengths: session.report?.strengths || [],
   weaknesses: session.report?.weaknesses || [],
   tips: session.report?.tips || [],

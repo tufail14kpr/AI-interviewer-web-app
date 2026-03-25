@@ -42,6 +42,11 @@ export const ReportPage = () => {
   }
 
   const categoryEntries = Object.entries(report.categoryScores || {})
+  const correctnessSummary = report.correctnessSummary || {
+    correctAnswers: 0,
+    partialAnswers: 0,
+    incorrectAnswers: 0
+  }
 
   return (
     <div className="report-layout">
@@ -49,12 +54,18 @@ export const ReportPage = () => {
         <div>
           <p className="eyebrow">Interview report</p>
           <h1>
-            {formatRole(report.role)} · {formatSeniority(report.seniority)}
+            {formatRole(report.role)} / {formatSeniority(report.seniority)}
           </h1>
           <p>{report.summary}</p>
         </div>
 
         <ScoreCard label="Overall score" value={report.overallScore} accent="ink" />
+      </section>
+
+      <section className="score-grid">
+        <ScoreCard label="Correct answers" value={correctnessSummary.correctAnswers} accent="gold" />
+        <ScoreCard label="Partial answers" value={correctnessSummary.partialAnswers} accent="coral" />
+        <ScoreCard label="Incorrect answers" value={correctnessSummary.incorrectAnswers} accent="ink" />
       </section>
 
       <section className="score-grid">
@@ -94,7 +105,7 @@ export const ReportPage = () => {
 
       <section className="list-panel">
         <div className="panel-header">
-          <h2>Transcript</h2>
+          <h2>Question by question review</h2>
           <Link className="ghost-button" to="/dashboard">
             Back to dashboard
           </Link>
@@ -104,10 +115,15 @@ export const ReportPage = () => {
           {report.transcript.map((turn) => (
             <article className="transcript-card" key={turn.questionNumber}>
               <p className="eyebrow">
-                Question {turn.questionNumber} · {turn.topic}
+                Question {turn.questionNumber} / {turn.topic}
               </p>
+              <div className="transcript-meta">
+                <span className={`verdict-pill ${turn.verdict || 'partial'}`}>{turn.verdict || 'partial'}</span>
+                <strong>{turn.accuracyScore ?? 0}% match</strong>
+              </div>
               <h3>{turn.question}</h3>
               <p>{turn.answer}</p>
+              <p className="answer-feedback">{turn.feedback}</p>
             </article>
           ))}
         </div>
@@ -115,4 +131,3 @@ export const ReportPage = () => {
     </div>
   )
 }
-

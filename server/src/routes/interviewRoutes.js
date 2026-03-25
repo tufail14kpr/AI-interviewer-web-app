@@ -28,6 +28,26 @@ const ensureActiveSession = (session) => {
   }
 }
 
+const loadPreviousQuestions = async ({ userId, role, excludeSessionId }) => {
+  const query = {
+    userId,
+    role
+  }
+
+  if (excludeSessionId) {
+    query._id = { $ne: excludeSessionId }
+  }
+
+  const sessions = await InterviewSession.find(query)
+    .sort({ createdAt: -1 })
+    .limit(12)
+    .select('turns.question')
+
+  return sessions
+    .flatMap((session) => session.turns.map((turn) => turn.question).filter(Boolean))
+    .slice(0, 40)
+}
+
 const hydratePendingQuestion = async (session) => {
   const hasPendingTurn = session.turns.some((turn) => !turn.answer?.trim())
   if (
@@ -38,11 +58,18 @@ const hydratePendingQuestion = async (session) => {
     return session
   }
 
+  const previousQuestions = await loadPreviousQuestions({
+    userId: session.userId,
+    role: session.role,
+    excludeSessionId: session._id
+  })
+
   const nextQuestion = await generateNextQuestion({
     role: session.role,
     seniority: session.seniority,
     turns: session.turns,
-    targetQuestionCount: session.targetQuestionCount
+    targetQuestionCount: session.targetQuestionCount,
+    previousQuestions
   })
 
   session.turns.push({
@@ -74,11 +101,16 @@ router.post(
     const role = assertRole(request.body.role)
     const seniority = assertSeniority(request.body.seniority)
     const targetQuestionCount = pickTargetQuestionCount(role, seniority)
+    const previousQuestions = await loadPreviousQuestions({
+      userId: request.user._id,
+      role
+    })
     const openingQuestion = await generateNextQuestion({
       role,
       seniority,
       turns: [],
-      targetQuestionCount
+      targetQuestionCount,
+      previousQuestions
     })
 
     const session = await InterviewSession.create({
@@ -165,7 +197,12 @@ router.post(
         role: session.role,
         seniority: session.seniority,
         turns: session.turns,
-        targetQuestionCount: session.targetQuestionCount
+        targetQuestionCount: session.targetQuestionCount,
+        previousQuestions: await loadPreviousQuestions({
+          userId: request.user._id,
+          role: session.role,
+          excludeSessionId: session._id
+        })
       })
 
       session.turns.push({

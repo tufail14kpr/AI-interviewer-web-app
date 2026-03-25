@@ -34,7 +34,22 @@ const transcriptEntrySchema = new mongoose.Schema(
     questionNumber: Number,
     topic: String,
     question: String,
-    answer: String
+    answer: String,
+    verdict: {
+      type: String,
+      enum: ['correct', 'partial', 'incorrect'],
+      default: 'partial'
+    },
+    accuracyScore: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 50
+    },
+    feedback: {
+      type: String,
+      default: ''
+    }
   },
   { _id: false }
 )
@@ -72,6 +87,21 @@ const evaluationReportSchema = new mongoose.Schema(
     summary: {
       type: String,
       default: ''
+    },
+    correctnessSummary: {
+      type: new mongoose.Schema(
+        {
+          correctAnswers: { type: Number, default: 0 },
+          partialAnswers: { type: Number, default: 0 },
+          incorrectAnswers: { type: Number, default: 0 }
+        },
+        { _id: false }
+      ),
+      default: () => ({
+        correctAnswers: 0,
+        partialAnswers: 0,
+        incorrectAnswers: 0
+      })
     },
     transcript: {
       type: [transcriptEntrySchema],

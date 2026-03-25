@@ -176,7 +176,10 @@ export const buildTranscript = (turns = []) =>
     questionNumber: index + 1,
     topic: turn.topic || 'general',
     question: turn.question,
-    answer: turn.answer || ''
+    answer: turn.answer || '',
+    verdict: turn.verdict || 'partial',
+    accuracyScore: turn.accuracyScore ?? 50,
+    feedback: turn.feedback || ''
   }))
 
 export const summarizeCoverage = (role, turns = []) => {
@@ -202,4 +205,3 @@ export const buildQuestionHistory = (turns = []) =>
       return `Q${index + 1} [${turn.topic || 'general'}]: ${turn.question}\nA${index + 1}: ${safeAnswer}`
     })
     .join('\n\n')
-
