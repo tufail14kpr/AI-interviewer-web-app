@@ -1,6 +1,8 @@
+import { Card as HeroCard, CardBody, CardHeader as HeroCardHeader, Chip } from '@heroui/react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ScoreCard } from '../components/ScoreCard'
+import { InterviewResultBoard } from '../components/report/InterviewResultBoard'
+import { QuestionReviewPanel } from '../components/report/QuestionReviewPanel'
 import { useAuth } from '../context/AuthContext'
 import { adminApi } from '../lib/api'
 import { formatRole, formatSeniority } from '../lib/interviewMeta'
@@ -37,88 +39,79 @@ export const AdminInterviewReviewPage = () => {
 
   const report = data.report
   const transcript = report?.transcript || data.session.turns || []
-  const correctnessSummary = report?.correctnessSummary || {
-    correctAnswers: 0,
-    partialAnswers: 0,
-    incorrectAnswers: 0
-  }
+  const candidateName = data.session.user?.name || 'Unknown candidate'
+  const candidateEmail = data.session.user?.email || 'Unknown email'
+  const roleLabel = formatRole(data.session.role)
+  const seniorityLabel = formatSeniority(data.session.seniority)
 
-  return (
-    <div className="report-layout">
-      <section className="report-hero">
-        <div>
-          <p className="eyebrow">Admin review</p>
-          <h1>
-            {formatRole(data.session.role)} / {formatSeniority(data.session.seniority)}
-          </h1>
-          <p>
-            Candidate: {data.session.user?.name || 'Unknown'} / {data.session.user?.email || 'Unknown'} / Status:{' '}
-            {data.session.status}
-          </p>
-        </div>
-
-        <div className="admin-review-actions">
-          {report ? <ScoreCard label="Overall score" value={report.overallScore} accent="ink" /> : null}
+  if (report) {
+    return (
+      <InterviewResultBoard
+        action={
           <Link className="ghost-button" to="/admin">
             Back to admin
           </Link>
-        </div>
-      </section>
+        }
+        eyebrow="Admin review"
+        metaChips={[roleLabel, seniorityLabel, data.session.status]}
+        report={report}
+        summary={`Candidate: ${candidateName} / ${candidateEmail}`}
+        title={`${roleLabel} / ${seniorityLabel}`}
+      />
+    )
+  }
 
-      {report ? (
-        <>
-          <section className="score-grid">
-            <ScoreCard label="Correct answers" value={correctnessSummary.correctAnswers} accent="gold" />
-            <ScoreCard label="Partial answers" value={correctnessSummary.partialAnswers} accent="coral" />
-            <ScoreCard label="Incorrect answers" value={correctnessSummary.incorrectAnswers} accent="ink" />
-          </section>
-
-          <section className="score-grid">
-            {Object.entries(report.categoryScores || {}).map(([key, value], index) => (
-              <ScoreCard key={key} label={key} value={value} accent={index % 2 === 0 ? 'gold' : 'coral'} />
-            ))}
-          </section>
-        </>
-      ) : (
-        <section className="list-panel">
-          <h2>Report pending</h2>
-          <p>This interview is still active. Admin can already inspect the candidate answers below.</p>
-        </section>
-      )}
-
-      <section className="list-panel">
-        <div className="panel-header">
-          <h2>Answer comparison</h2>
-          <small>Candidate answer vs AI ideal answer</small>
-        </div>
-
-        <div className="transcript-list">
-          {transcript.map((turn) => (
-            <article className="transcript-card" key={turn.questionNumber}>
-              <p className="eyebrow">
-                Question {turn.questionNumber} / {turn.topic}
+  return (
+    <div className="grid gap-6">
+      <HeroCard className="border border-white/45 bg-[linear-gradient(160deg,rgba(255,253,249,0.96),rgba(252,241,226,0.88))] shadow-[0_24px_60px_rgba(28,34,48,0.12)]">
+        <HeroCardHeader className="flex flex-col gap-5 px-6 pb-0 pt-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-700/75">
+                Admin review
               </p>
-              <div className="transcript-meta">
-                <span className={`verdict-pill ${turn.verdict || 'partial'}`}>{turn.verdict || 'pending'}</span>
-                <strong>{turn.accuracyScore ?? 0}% match</strong>
-              </div>
-              <h3>{turn.question}</h3>
-              <div className="comparison-grid">
-                <article className="comparison-card">
-                  <span>Candidate answer</span>
-                  <p>{turn.answer || 'No answer yet.'}</p>
-                </article>
+              <h1 className="font-serif text-4xl leading-none tracking-[-0.05em] text-slate-950 sm:text-5xl">
+                {roleLabel} / {seniorityLabel}
+              </h1>
+              <p className="max-w-3xl text-sm leading-7 text-slate-600">
+                Candidate: {candidateName} / {candidateEmail}
+              </p>
+            </div>
 
-                <article className="comparison-card ideal">
-                  <span>AI ideal answer</span>
-                  <p>{turn.idealAnswer || 'Ideal answer is generated after evaluation is complete.'}</p>
-                </article>
-              </div>
-              {turn.feedback ? <p className="answer-feedback">{turn.feedback}</p> : null}
-            </article>
-          ))}
-        </div>
-      </section>
+            <div className="flex flex-wrap items-center gap-3">
+              <Chip className="bg-white/80 text-slate-700" radius="full" variant="flat">
+                {roleLabel}
+              </Chip>
+              <Chip className="bg-white/80 text-slate-700" radius="full" variant="flat">
+                {seniorityLabel}
+              </Chip>
+              <Chip color="warning" radius="full" variant="flat">
+                {data.session.status}
+              </Chip>
+            </div>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-3">
+            <Link className="ghost-button" to="/admin">
+              Back to admin
+            </Link>
+          </div>
+        </HeroCardHeader>
+
+        <CardBody className="px-6 pb-6 pt-4 text-sm leading-7 text-slate-600">
+          This interview is still active, so the final report is not ready yet. Admin can already
+          inspect the submitted answers below, and the AI ideal answer will appear after evaluation
+          is complete.
+        </CardBody>
+      </HeroCard>
+
+      <QuestionReviewPanel
+        candidateLabel="Candidate answer"
+        description="Review the live transcript while the interview is still in progress."
+        idealFallback="Ideal answer is generated after evaluation is complete."
+        title="Live answer review"
+        transcript={transcript}
+      />
     </div>
   )
 }
