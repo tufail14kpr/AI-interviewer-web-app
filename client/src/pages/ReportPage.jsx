@@ -122,13 +122,20 @@ export const ReportPage = () => {
                 <strong>{turn.accuracyScore ?? 0}% match</strong>
               </div>
               <h3>{turn.question}</h3>
-              <p>{turn.answer}</p>
-              {turn.verdict !== 'correct' && turn.idealAnswer ? (
-                <div className="comparison-card ideal report-ideal-answer">
-                  <span>AI ideal answer</span>
-                  <p>{turn.idealAnswer}</p>
-                </div>
-              ) : null}
+              <div
+                className={`comparison-grid${turn.verdict !== 'correct' && turn.idealAnswer ? '' : ' single'}`}
+              >
+                <article className="comparison-card">
+                  <span>Your answer</span>
+                  <p>{turn.answer}</p>
+                </article>
+                {turn.verdict !== 'correct' && turn.idealAnswer ? (
+                  <article className="comparison-card ideal report-ideal-answer">
+                    <span>AI ideal answer</span>
+                    <p>{turn.idealAnswer}</p>
+                  </article>
+                ) : null}
+              </div>
               <p className="answer-feedback">{turn.feedback}</p>
             </article>
           ))}

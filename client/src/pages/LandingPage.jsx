@@ -34,6 +34,12 @@ export const LandingPage = () => (
         </Link>
       </div>
 
+      <div className="hero-tags">
+        <span>Role-scoped question sets</span>
+        <span>Adaptive follow-up flow</span>
+        <span>Per-question answer review</span>
+      </div>
+
       <div className="stat-row">
         <div className="stat-card">
           <strong>20-25</strong>
@@ -71,6 +77,17 @@ export const LandingPage = () => (
           Review strengths, weaknesses, improvement tips, category scores, and the full transcript
           from each interview.
         </p>
+      </div>
+
+      <div className="summary-strip landing-strip">
+        <div>
+          <span>Interview style</span>
+          <strong>Theory, debugging, architecture, and tradeoff questions</strong>
+        </div>
+        <div>
+          <span>Report output</span>
+          <strong>Correct vs wrong counts, ideal answers, and transcript review</strong>
+        </div>
       </div>
     </section>
   </div>

@@ -74,10 +74,11 @@ export const InterviewPage = () => {
       <section className="interview-sidebar">
         <p className="eyebrow">Interview session</p>
         <h1>
-          {formatRole(session.role)} · {formatSeniority(session.seniority)}
+          {formatRole(session.role)} / {formatSeniority(session.seniority)}
         </h1>
         <p>
-          {session.answeredQuestions} answered of {session.targetQuestionCount}. The current question stays in the transcript until you finish the session.
+          {session.answeredQuestions} answered of {session.targetQuestionCount}. The current
+          question stays in the transcript until you finish the session.
         </p>
 
         <div className="progress-card">

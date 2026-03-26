@@ -50,10 +50,10 @@ export const AppShell = ({ children }) => {
             <>
               <div className="user-chip">
                 <span>{user?.name}</span>
-                <small>
-                  {user?.email}
-                  {user?.role === 'admin' ? ' / Admin' : ''}
-                </small>
+                <small>{user?.email}</small>
+                <span className={`user-chip-role ${user?.role === 'admin' ? 'admin' : ''}`}>
+                  {user?.role === 'admin' ? 'Admin access' : 'Candidate'}
+                </span>
               </div>
               <button className="ghost-button" type="button" onClick={logout}>
                 Log out
