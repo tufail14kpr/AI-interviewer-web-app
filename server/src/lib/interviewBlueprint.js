@@ -179,7 +179,8 @@ export const buildTranscript = (turns = []) =>
     answer: turn.answer || '',
     verdict: turn.verdict || 'partial',
     accuracyScore: turn.accuracyScore ?? 50,
-    feedback: turn.feedback || ''
+    feedback: turn.feedback || '',
+    idealAnswer: turn.idealAnswer || ''
   }))
 
 export const summarizeCoverage = (role, turns = []) => {

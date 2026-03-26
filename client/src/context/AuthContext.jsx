@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { authApi } from '../lib/api'
 
 const STORAGE_KEY = 'axis-interview-auth'
@@ -38,6 +38,30 @@ export const AuthProvider = ({ children }) => {
     persistSession(result)
     return result
   }
+
+  useEffect(() => {
+    const syncUser = async () => {
+      if (!session.token) {
+        return
+      }
+
+      try {
+        const payload = await authApi.me(session.token)
+        setSession((current) => {
+          const nextSession = {
+            ...current,
+            user: payload.user
+          }
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextSession))
+          return nextSession
+        })
+      } catch (_error) {
+        // Keep the current session until the user logs out explicitly.
+      }
+    }
+
+    syncUser()
+  }, [session.token])
 
   const value = {
     token: session.token,

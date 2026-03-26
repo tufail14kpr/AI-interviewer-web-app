@@ -22,8 +22,8 @@ export const SignupPage = () => {
     setError('')
 
     try {
-      await signup(form)
-      navigate('/dashboard', { replace: true })
+      const result = await signup(form)
+      navigate(result.user?.role === 'admin' ? '/admin' : '/dashboard', { replace: true })
     } catch (submitError) {
       setError(submitError.message)
     } finally {
@@ -77,4 +77,3 @@ export const SignupPage = () => {
     </section>
   )
 }
-

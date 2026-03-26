@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
 import { env } from '../config/env.js'
 import { ApiError } from '../lib/ApiError.js'
+import { isAdminUser, resolveUserRole } from '../lib/userRoles.js'
 
 export const requireAuth = async (request, _response, next) => {
   try {
@@ -19,6 +20,12 @@ export const requireAuth = async (request, _response, next) => {
       throw new ApiError(401, 'User session is no longer valid.', 'invalid_session')
     }
 
+    const resolvedRole = resolveUserRole(user.email, user.role)
+    if (resolvedRole !== user.role) {
+      user.role = resolvedRole
+      await user.save()
+    }
+
     request.user = user
     next()
   } catch (error) {
@@ -26,3 +33,11 @@ export const requireAuth = async (request, _response, next) => {
   }
 }
 
+export const requireAdmin = (request, _response, next) => {
+  if (!isAdminUser(request.user)) {
+    next(new ApiError(403, 'Admin access is required.', 'admin_required'))
+    return
+  }
+
+  next()
+}

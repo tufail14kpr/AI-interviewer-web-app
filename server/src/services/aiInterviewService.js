@@ -218,7 +218,7 @@ const buildReportSchema = () => ({
         items: {
           type: 'object',
           additionalProperties: false,
-          required: ['questionNumber', 'verdict', 'accuracyScore', 'feedback'],
+          required: ['questionNumber', 'verdict', 'accuracyScore', 'idealAnswer', 'feedback'],
           properties: {
             questionNumber: {
               type: 'integer',
@@ -232,6 +232,9 @@ const buildReportSchema = () => ({
               type: 'integer',
               minimum: 0,
               maximum: 100
+            },
+            idealAnswer: {
+              type: 'string'
             },
             feedback: {
               type: 'string'
@@ -386,7 +389,8 @@ export const evaluateInterview = async ({ role, seniority, turns }) => {
           ...entry,
           verdict: analysis?.verdict || 'partial',
           accuracyScore: analysis?.accuracyScore ?? 50,
-          feedback: analysis?.feedback || ''
+          feedback: analysis?.feedback || '',
+          idealAnswer: analysis?.idealAnswer || ''
         }
       })
 

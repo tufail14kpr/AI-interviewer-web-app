@@ -1,6 +1,9 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { AdminRoute } from './components/AdminRoute'
 import { AppShell } from './components/AppShell'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { AdminDashboardPage } from './pages/AdminDashboardPage'
+import { AdminInterviewReviewPage } from './pages/AdminInterviewReviewPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { InterviewPage } from './pages/InterviewPage'
 import { LandingPage } from './pages/LandingPage'
@@ -23,10 +26,14 @@ const App = () => (
         <Route path="/report/:sessionId" element={<ReportPage />} />
       </Route>
 
+      <Route element={<AdminRoute />}>
+        <Route path="/admin" element={<AdminDashboardPage />} />
+        <Route path="/admin/interviews/:sessionId" element={<AdminInterviewReviewPage />} />
+      </Route>
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   </AppShell>
 )
 
 export default App
-

@@ -123,6 +123,12 @@ export const ReportPage = () => {
               </div>
               <h3>{turn.question}</h3>
               <p>{turn.answer}</p>
+              {turn.verdict !== 'correct' && turn.idealAnswer ? (
+                <div className="comparison-card ideal report-ideal-answer">
+                  <span>AI ideal answer</span>
+                  <p>{turn.idealAnswer}</p>
+                </div>
+              ) : null}
               <p className="answer-feedback">{turn.feedback}</p>
             </article>
           ))}

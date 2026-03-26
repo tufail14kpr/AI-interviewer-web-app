@@ -17,6 +17,11 @@ const userSchema = new mongoose.Schema(
     passwordHash: {
       type: String,
       required: true
+    },
+    role: {
+      type: String,
+      enum: ['candidate', 'admin'],
+      default: 'candidate'
     }
   },
   {
@@ -27,4 +32,3 @@ const userSchema = new mongoose.Schema(
 const User = mongoose.model('User', userSchema)
 
 export default User
-

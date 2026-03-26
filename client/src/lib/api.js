@@ -34,7 +34,8 @@ export const apiRequest = async ({ path, method = 'GET', token, body }) => {
 
 export const authApi = {
   signup: (body) => apiRequest({ path: '/api/auth/signup', method: 'POST', body }),
-  login: (body) => apiRequest({ path: '/api/auth/login', method: 'POST', body })
+  login: (body) => apiRequest({ path: '/api/auth/login', method: 'POST', body }),
+  me: (token) => apiRequest({ path: '/api/auth/me', token })
 }
 
 export const interviewApi = {
@@ -48,3 +49,8 @@ export const interviewApi = {
   report: (token, sessionId) => apiRequest({ path: `/api/reports/${sessionId}`, token })
 }
 
+export const adminApi = {
+  overview: (token) => apiRequest({ path: '/api/admin/overview', token }),
+  createInterview: (token, body) => apiRequest({ path: '/api/admin/interviews', method: 'POST', token, body }),
+  getInterview: (token, sessionId) => apiRequest({ path: `/api/admin/interviews/${sessionId}`, token })
+}

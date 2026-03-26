@@ -12,14 +12,20 @@ const privateLinks = [
   { to: '/interview/new', label: 'New Interview' }
 ]
 
+const adminLinks = [
+  { to: '/admin', label: 'Admin' },
+  { to: '/dashboard', label: 'Candidate' }
+]
+
 export const AppShell = ({ children }) => {
   const { isAuthenticated, logout, user } = useAuth()
-  const links = isAuthenticated ? privateLinks : publicLinks
+  const links = isAuthenticated ? (user?.role === 'admin' ? adminLinks : privateLinks) : publicLinks
+  const homeLink = isAuthenticated ? (user?.role === 'admin' ? '/admin' : '/dashboard') : '/'
 
   return (
     <div className="app-frame">
       <header className="topbar">
-        <Link className="brand" to={isAuthenticated ? '/dashboard' : '/'}>
+        <Link className="brand" to={homeLink}>
           <span className="brand-mark">A</span>
           <span>
             <strong>Axis Interview Lab</strong>
@@ -44,7 +50,10 @@ export const AppShell = ({ children }) => {
             <>
               <div className="user-chip">
                 <span>{user?.name}</span>
-                <small>{user?.email}</small>
+                <small>
+                  {user?.email}
+                  {user?.role === 'admin' ? ' / Admin' : ''}
+                </small>
               </div>
               <button className="ghost-button" type="button" onClick={logout}>
                 Log out
@@ -62,4 +71,3 @@ export const AppShell = ({ children }) => {
     </div>
   )
 }
-

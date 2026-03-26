@@ -79,7 +79,7 @@ export const DashboardPage = () => {
             <article className="session-card" key={session.id}>
               <div>
                 <p className="eyebrow">
-                  {formatRole(session.role)} · {formatSeniority(session.seniority)}
+                  {formatRole(session.role)} / {formatSeniority(session.seniority)}
                 </p>
                 <h3>{session.status === 'completed' ? 'Completed interview' : 'Active interview'}</h3>
                 <p>
@@ -105,4 +105,3 @@ export const DashboardPage = () => {
     </div>
   )
 }
-

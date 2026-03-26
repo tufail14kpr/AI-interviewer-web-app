@@ -7,8 +7,17 @@ import {
 export const serializeUser = (user) => ({
   id: user._id?.toString() || user.id,
   name: user.name,
-  email: user.email
+  email: user.email,
+  role: user.role || 'candidate'
 })
+
+const serializeSessionOwner = (owner) => {
+  if (!owner || typeof owner !== 'object' || !('email' in owner)) {
+    return null
+  }
+
+  return serializeUser(owner)
+}
 
 const normalizeReportTranscript = (session) => {
   const baseTranscript = session.report?.transcript || buildTranscript(session.turns)
@@ -23,7 +32,8 @@ const normalizeReportTranscript = (session) => {
       entry.accuracyScore ?? (entry.verdict === 'correct' ? 85 : entry.verdict === 'incorrect' ? 35 : 60),
     feedback:
       entry.feedback ||
-      'Detailed per-question grading is available on newly completed interviews. This older report was normalized for display.'
+      'Detailed per-question grading is available on newly completed interviews. This older report was normalized for display.',
+    idealAnswer: entry.idealAnswer || ''
   }))
 }
 
@@ -51,6 +61,7 @@ export const serializeSessionSummary = (session) => ({
   id: session._id?.toString() || session.id,
   role: session.role,
   seniority: session.seniority,
+  user: serializeSessionOwner(session.userId),
   status: session.status,
   targetQuestionCount: session.targetQuestionCount,
   totalQuestionsAsked: session.turns.length,
@@ -69,6 +80,7 @@ export const serializeSession = (session) => {
     id: session._id?.toString() || session.id,
     role: session.role,
     seniority: session.seniority,
+    user: serializeSessionOwner(session.userId),
     status: session.status,
     targetQuestionCount: session.targetQuestionCount,
     totalQuestionsAsked: session.turns.length,
@@ -104,6 +116,7 @@ export const serializeReport = (session) => {
     sessionId: session._id?.toString() || session.id,
     role: session.role,
     seniority: session.seniority,
+    user: serializeSessionOwner(session.userId),
     overallScore: session.report?.overallScore ?? 0,
     categoryScores: session.report?.categoryScores || {},
     correctnessSummary: session.report?.correctnessSummary || summarizeCorrectness(transcript),

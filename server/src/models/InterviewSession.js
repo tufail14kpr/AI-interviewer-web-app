@@ -49,6 +49,10 @@ const transcriptEntrySchema = new mongoose.Schema(
     feedback: {
       type: String,
       default: ''
+    },
+    idealAnswer: {
+      type: String,
+      default: ''
     }
   },
   { _id: false }

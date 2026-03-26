@@ -23,8 +23,10 @@ export const LoginPage = () => {
     setError('')
 
     try {
-      await login(form)
-      navigate(location.state?.from || '/dashboard', { replace: true })
+      const result = await login(form)
+      navigate(location.state?.from || (result.user?.role === 'admin' ? '/admin' : '/dashboard'), {
+        replace: true
+      })
     } catch (submitError) {
       setError(submitError.message)
     } finally {
@@ -72,4 +74,3 @@ export const LoginPage = () => {
     </section>
   )
 }
-

@@ -5,7 +5,9 @@ import User from '../models/User.js'
 import { env } from '../config/env.js'
 import { asyncHandler } from '../lib/asyncHandler.js'
 import { ApiError } from '../lib/ApiError.js'
+import { requireAuth } from '../middleware/auth.js'
 import { serializeUser } from '../lib/serializers.js'
+import { resolveUserRole } from '../lib/userRoles.js'
 import { assertDisplayName, assertStrongPassword, assertValidEmail } from '../lib/validators.js'
 
 const router = express.Router()
@@ -37,7 +39,8 @@ router.post(
     const user = await User.create({
       name,
       email,
-      passwordHash
+      passwordHash,
+      role: resolveUserRole(email)
     })
 
     response.status(201).json({
@@ -63,6 +66,12 @@ router.post(
       throw new ApiError(401, 'Invalid email or password.', 'invalid_credentials')
     }
 
+    const resolvedRole = resolveUserRole(user.email, user.role)
+    if (resolvedRole !== user.role) {
+      user.role = resolvedRole
+      await user.save()
+    }
+
     response.json({
       token: buildToken(user._id.toString()),
       user: serializeUser(user)
@@ -70,5 +79,14 @@ router.post(
   })
 )
 
-export default router
+router.get(
+  '/me',
+  requireAuth,
+  asyncHandler(async (request, response) => {
+    response.json({
+      user: serializeUser(request.user)
+    })
+  })
+)
 
+export default router

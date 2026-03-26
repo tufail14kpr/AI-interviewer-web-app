@@ -48,6 +48,41 @@ const categoryDefaultsBySeniority = {
   senior: 78
 }
 
+const IDEAL_ANSWER_GUIDES = {
+  html_semantics:
+    'A strong answer should explain using semantic elements such as header, nav, main, section, article, button, and form labels so the UI stays accessible, easier to test, and easier to maintain.',
+  css_layout:
+    'A strong answer should compare Grid and Flexbox, explain responsive breakpoints, and describe how the layout remains stable when content size changes.',
+  javascript_fundamentals:
+    'A strong answer should mention the event loop, promises, async handling, race conditions, and how to validate behavior with debugging or tests.',
+  typescript:
+    'A strong answer should describe safer contracts with interfaces, unions, narrowing, and clear API boundaries that reduce runtime mistakes.',
+  react_state:
+    'A strong answer should explain where state should live, how updates flow, how to avoid stale state, and how to keep rendering predictable.',
+  component_architecture:
+    'A strong answer should separate reusable UI, business logic, and composition concerns so the feature is easier to extend and test.',
+  performance:
+    'A strong answer should identify bottlenecks, measure before changing anything, optimize the most expensive path, and validate the result with metrics.',
+  accessibility:
+    'A strong answer should cover semantics, keyboard access, focus handling, labels, contrast, and validation with accessibility tooling.',
+  testing:
+    'A strong answer should balance unit, integration, and end-to-end testing based on risk and show how failures would be caught before release.',
+  api_design:
+    'A strong answer should define clear request and response contracts, validation, error handling, versioning strategy, and compatibility expectations.',
+  database_design:
+    'A strong answer should explain schema choices, indexing, read and write patterns, and how the design supports future growth safely.',
+  authentication:
+    'A strong answer should describe authentication, authorization, token or session handling, and how to protect sensitive routes and data.',
+  system_design:
+    'A strong answer should cover boundaries, reliability, data flow, scaling risks, and rollout tradeoffs instead of only listing components.',
+  scalability:
+    'A strong answer should discuss bottleneck detection, caching, concurrency, capacity planning, and validation under higher traffic.',
+  security:
+    'A strong answer should mention threat awareness, validation, least privilege, secure defaults, and monitoring for abuse or leaks.',
+  observability:
+    'A strong answer should explain how logs, metrics, traces, alerts, and debugging workflows work together during incident response.'
+}
+
 const QUESTION_VARIANTS = {
   html_semantics: {
     theory: [
@@ -371,6 +406,9 @@ const evaluateMockAnswer = (turn, index) => {
     answer,
     verdict,
     accuracyScore,
+    idealAnswer:
+      IDEAL_ANSWER_GUIDES[turn.topic] ||
+      'A strong answer should explain the core concept, discuss tradeoffs, and show how the solution would be validated in practice.',
     feedback:
       verdict === 'correct'
         ? 'Strong answer. You covered the main idea and backed it with practical reasoning.'
